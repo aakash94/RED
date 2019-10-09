@@ -1,6 +1,6 @@
 import gym
-from .ReplayBuffer import ReplayBuffer
-from .AgentDQN import AgentDQN
+from .ReplayBuffer import ReplayBuffer as ReplayBuffer
+from .AgentDQN import AgentDQN as AgentDQN
 from stable_baselines import DQN
 
 import random
@@ -12,7 +12,7 @@ import torchvision.transforms as T
 from torch.utils.tensorboard import SummaryWriter
 import pandas as pd
 import numpy as np
-
+import os
 
 
 # if gpu is to be used
@@ -58,6 +58,8 @@ optimizer = optim.Adam(qvfa.parameters(), lr = LEARN_RATE)
 criterion = nn.MSELoss()
 buffer = ReplayBuffer(1000000)
 
+def clear():
+    os.system( 'cls' )
 
 def select_action(state, ep=0):
     sample = random.random()
@@ -110,6 +112,7 @@ def optimize_model(i_episode=0):
     writer.add_scalar(tag_loss, loss.item(), i_episode)
 
 def standard_decay (episode, highest_reward=0, eps=EPSILON):
+    eps *= EPSILON_DECAY
     return  eps
 
 def rbed(episode, highest_reward=0, eps=EPSILON):
@@ -124,30 +127,35 @@ def decay_epsilon(episode, highest_reward=0, eps=EPSILON):
     eps = eps if eps < EPSILON else EPSILON
     return eps
 
-for i_episode in range(NUM_EPISODES):
-    state = env.reset()
-    done = False
-    total_reward = 0
-    while not done:
-        env.render(mode='rgb_array')
-        action = select_action(state, ep=EPSILON)
-        next_state, reward, done, info = env.step(action)
-        total_reward += reward
-        if done:
-            reward = -reward
-        buffer.insert(state, action, next_state, reward, done)
-        state = next_state
 
-    writer.add_scalar(tag_reward, total_reward, i_episode)
-    writer.add_scalar(tag_ep, EPSILON, i_episode)
-    for _ in range(OPTIMIZE_COUNT):
-        optimize_model(i_episode)
 
-    EPSILON = decay_epsilon(i_episode, total_reward, EPSILON)
-    # if EPSILON > 0.2 and i_episode > 32 and total_reward > MINREWARD:
-    #     EPSILON -= 0.1
-    #     MINREWARD += 20
+def __main__():
+    for i_episode in range(NUM_EPISODES):
+        state = env.reset()
+        done = False
+        total_reward = 0
+        while not done:
+            env.render(mode='rgb_array')
+            action = select_action(state, ep=EPSILON)
+            next_state, reward, done, info = env.step(action)
+            total_reward += reward
+            if done:
+                reward = -reward
+            buffer.insert(state, action, next_state, reward, done)
+            state = next_state
 
-print('Complete')
-env.render()
-env.close()
+        writer.add_scalar(tag_reward, total_reward, i_episode)
+        writer.add_scalar(tag_ep, EPSILON, i_episode)
+        clear()
+        print('e\t', EPSILON, '\t reward', total_reward)
+        for _ in range(OPTIMIZE_COUNT):
+            optimize_model(i_episode)
+
+        EPSILON = decay_epsilon(i_episode, total_reward, EPSILON)
+        # if EPSILON > 0.2 and i_episode > 32 and total_reward > MINREWARD:
+        #     EPSILON -= 0.1
+        #     MINREWARD += 20
+
+    print('Complete')
+    env.render()
+    env.close()
