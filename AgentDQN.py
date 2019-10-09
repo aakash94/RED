@@ -4,7 +4,7 @@ import torch.nn.functional as F
 class AgentDQN(nn.Module):
 
     def __init__(self, n_ip, n_op):
-        super(DqnAgent, self).__init__()
+        super(AgentDQN, self).__init__()
         self.fc1 = nn.Linear(n_ip, n_ip *16)
         self.fc2 = nn.Linear(n_ip *16, n_ip *16)
         self.fc3 = nn.Linear(n_ip *16, n_op)
