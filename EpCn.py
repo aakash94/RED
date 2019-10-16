@@ -125,8 +125,8 @@ class EpisodicAgent(object):
             # self.epsilon *= self.epsilon_decay
             # self.epsilon = max(self.epsilon, self.epsilon_min)  # cap at epsilon_min
 
-            self.exp_decay_epsilon()
-            # self.rb_decay_epsilon(last_total_reward)
+            # self.exp_decay_epsilon()
+            self.rb_decay_epsilon(last_total_reward)
 
             self.writer.add_scalar('epsilon', self.epsilon, iteration)
 
@@ -142,8 +142,8 @@ if __name__ == '__main__':
     #tensorboard
     MODE_E = 'EXPONENTIAL'
     MODE_R1 = 'RBED_LAST'
-    MODE_R2 = 'RBED_CURR'
-    MODE = MODE_E
+    MODE_R = 'RBED'
+    MODE = MODE_R
     writer = SummaryWriter(comment=MODE)
     last_ep_reward = 0
     scores = deque(maxlen=100)  # because solution depends on last 100 solution.
@@ -159,6 +159,7 @@ if __name__ == '__main__':
     reward = 0
     done = False
     sum_reward_running = 0
+    last_ep_reward = 0
 
     for i in range(episode_count):
         ob = env.reset()
@@ -166,8 +167,7 @@ if __name__ == '__main__':
 
 
         for j in range(max_steps):
-            action = agent.act(ob, reward, done, last_total_reward=sum_reward, iteration=i)
-            #action = agent.act(ob, reward, done, last_total_reward=last_ep_reward, , iteration=i)
+            action = agent.act(ob, reward, done, last_total_reward=last_ep_reward, iteration=i)
             ob, reward, done, _ = env.step(action)
             sum_reward += reward
             if done:
