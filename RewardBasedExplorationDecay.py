@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import trange
-
+import glob
 import gym
 from collections import deque
 
@@ -186,6 +186,13 @@ class RecordPanda(object):
 
         self.save_records()
 
+
+def get_last_modified_folder_name(folder_path = 'runs/'):
+    folder_path =  folder_path+ "**/"
+    list_of_folders = [f for f in glob.glob(folder_path)]
+    latest_file = max(list_of_folders, key=os.path.getctime)
+    latest_file = latest_file.split('\\')[1]
+    return latest_file
 
 if __name__ == '__main__':
 
@@ -735,15 +742,15 @@ if __name__ == '__main__':
         scores = deque(maxlen=100)  # because solution depends on last 100 solution.
         scores.append(int(0))
 
-        experiment_name = 'abcdef' #TODO : get thensorboard name here
+        experiment_name = get_last_modified_folder_name()
         rp.current[i_experiment] = experiment_name
         rp.current100[i_experiment] = experiment_name
 
-        for i in trange(episode_count, desc='episode', ascii=True):
+        for i in trange(episode_count, desc='episode'):
             ob = env.reset()
             sum_reward = 0
 
-            for j in trange(max_steps, desc='step', ascii=True):
+            for j in range(max_steps):#, desc='step'):
                 action = agent.act(ob, reward, done, last_total_reward=last_ep_reward, iteration=i)
                 ob, reward, done, _ = env.step(action)
                 sum_reward += reward
