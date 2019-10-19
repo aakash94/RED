@@ -200,7 +200,7 @@ if __name__ == '__main__':
     MODE_E = 'EXPONENTIAL'
     MODE_R = 'RBED'
     MODE = MODE_E
-    # TODO : Support folder for different modes.
+    #tb_log_dir = "runs/"+MODE+"/"
 
     header = ['0',
         '1',
@@ -722,21 +722,21 @@ if __name__ == '__main__':
 
 
 
-    run_count = 2 # how many times to repeat the experiment
+    run_count = 100 # how many times to repeat the experiment
     episode_count = 500
     max_steps = 200
     reward = 0
     done = False
     sum_reward_running = 0
     last_ep_reward = 0
-    writer = SummaryWriter(comment=MODE)
+    #writer = SummaryWriter(comment=MODE)
 
     for r in trange(run_count, desc='RUN'):
 
         #print('run', (r+1), '/', run_count)
         rp.current[i_mode] = MODE
         rp.current100[i_mode] = MODE
-        writer = SummaryWriter(comment=MODE)
+        writer = SummaryWriter(comment=MODE)#, log_dir=tb_log_dir)
         agent = EpisodicAgent(env.action_space, summary_writer=writer, mode=MODE)
         last_ep_reward = 0
         scores = deque(maxlen=100)  # because solution depends on last 100 solution.
